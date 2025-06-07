@@ -1,0 +1,22 @@
+{
+  "name": "Malwatcher | Project ACS EDU 3rd Generation",
+  "short_name": "Malwatcher",
+  "description": "Malwatcher is a collaborative malware analysis project that provides a simple web-based interface for scanning files, viewing threat metadata, and tracking detection logs. Designed with clarity and usability in mind, it’s perfect for students, researchers, and cyber enthusiasts.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "url": "data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIj8+PHN2ZyBmaWxsPSIjMUExQTFBIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciICB2aWV3Qm94PSIwIDAgNTAgNTAiIHdpZHRoPSIxNTBweCIgaGVpZ2h0PSIxNTBweCI+ICAgIDxwYXRoIGQ9Ik0yNSwyQzEyLjMxNywyLDIsMTIuMzE3LDIsMjVzMTAuMzE3LDIzLDIzLDIzczIzLTEwLjMxNywyMy0yM1MzNy42ODMsMiwyNSwyeiBNMTQsNDIuODU0VjI2bDcuODI0LDE5LjczMyBDMTguOTksNDUuMywxNi4zNDUsNDQuMzA0LDE0LDQyLjg1NHogTTE3Ljk5MSw1LjIyOUMyMC4xODcsNC40NDgsMjIuNTM5LDQsMjUsNHM0LjgxMywwLjQ0OCw3LjAwOSwxLjIyOUwyNSwyMUwxNy45OTEsNS4yMjl6IE0zNiw0Mi44NTRjLTIuMzQ1LDEuNDUtNC45OSwyLjQ0Ni03LjgyNCwyLjg3OUwzNiwyNlY0Mi44NTR6Ii8+PC9zdmc+",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["productivity", "education", "security"],
+  "lang": "en",
+  "dir": "ltr"
+}
+  

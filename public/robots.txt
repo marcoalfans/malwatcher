@@ -1,0 +1,6 @@
+# Robots.txt 
+# Generated automatically on 2025-05-26T12:11:07.262Z
+# Allow all search engines to crawl the site
+
+User-agent: *
+Allow: /
