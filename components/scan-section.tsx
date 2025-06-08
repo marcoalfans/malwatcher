@@ -1,44 +1,10 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { Shield, Terminal, Server, Code, Database, Globe, Icon } from "lucide-react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-
-const skills = [
-  {
-    category: "Cybersecurity",
-    icon: <Shield className="w-6 h-6" />,
-    items: ["Penetration Testing", "Vulnerability Assessment", "CTF Competitions", "Security Research"],
-  },
-  {
-    category: "Operating Systems",
-    icon: <Terminal className="w-6 h-6" />,
-    items: ["Linux", "Windows", "Kali Linux", "Ubuntu"],
-  },
-  {
-    category: "Infrastructure",
-    icon: <Server className="w-6 h-6" />,
-    items: ["Docker", "Kubernetes", "AWS", "Networking"],
-  },
-  {
-    category: "Programming",
-    icon: <Code className="w-6 h-6" />,
-    items: ["Python", "JavaScript", "PHP", "Bash", "Go"],
-  },
-  {
-    category: "Databases",
-    icon: <Database className="w-6 h-6" />,
-    items: ["MySQL", "PostgreSQL", "MongoDB", "SQLite"],
-  },
-  {
-    category: "Web Technologies",
-    icon: <Globe className="w-6 h-6" />,
-    items: ["HTML/CSS", "React", "Node.js", "Web Security"],
-  },
-]
 
 export function ScanSection() {
   
@@ -84,7 +50,22 @@ export function ScanSection() {
 
   return (
     <div className="container px-4 py-16 mx-auto max-w-7xl" id="scan">
-      <h2 className="mb-6 text-3xl font-bold text-center">Scan with Malwatcher</h2>
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        viewport={{ once: true }}
+        className="mb-12 text-center"
+      >
+        <h2 className="text-5xl font-bold tracking-tight neon-text-green">Curious About That File or Link?</h2>
+        <p className="mt-4 text-xl text-muted-foreground">Before you open it or run it, let Malwatcher scan for hidden malware, threats, or shady behaviors — because it's better safe than sorry.</p>
+      </motion.div>
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        viewport={{ once: true }}
+      >
       <Tabs defaultValue="file" className="w-full max-w-xl mx-auto">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="file">File</TabsTrigger>
@@ -100,10 +81,25 @@ export function ScanSection() {
               </g>
             </svg>
           </div>
-          <Input
-            type="file"
-            onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-          />
+          <div className="flex items-center w-full border border-input bg-background rounded-md px-3 py-2 text-sm shadow-sm">
+              <label className="cursor-pointer text-muted-foreground font-medium">
+                Choose File
+                <input
+                  type="file"
+                  className="hidden"
+                  onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+                />
+              </label>
+              <span className="mx-2 text-muted">|</span>
+              <span className="truncate text-muted-foreground flex-1 text-left">
+                {file ? file.name : "No file chosen"}
+              </span>
+            </div>
+            {file && (
+            <p className="text-sm text-muted-foreground text-right text-primary">
+              {(file.size / 1024).toFixed(1)} KB
+            </p>
+          )}
           <div className="flex justify-center">
             <Button className="text-md font-semibold min-h-[28px]" onClick={handleFileUpload} disabled={!file}>Scan File</Button>
           </div>
@@ -126,34 +122,7 @@ export function ScanSection() {
           </div>
         </TabsContent>
       </Tabs>
-
-      <h2 className="mb-12 mt-20 text-3xl font-bold tracking-tight text-center">Skills & Expertise</h2>
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {skills.map((skill, index) => (
-          <motion.div
-            key={index}
-            initial={{ opacity: 0, y: 15 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: index * 0.05 }}
-            viewport={{ once: true, margin: "-50px" }}
-            className="p-6 rounded-lg bg-card min-h-[200px]"
-          >
-            <div className="flex items-center gap-3 mb-4">
-              <div className="p-2 rounded-full bg-primary/10 text-primary">{skill.icon}</div>
-              <h3 className="text-xl font-semibold min-h-[28px]">{skill.category}</h3>
-            </div>
-
-            <ul className="space-y-2">
-              {skill.items.map((item) => (
-                <li key={item} className="flex items-center gap-2 min-h-[24px]">
-                  <div className="w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0" />
-                  <span>{item}</span>
-                </li>
-              ))}
-            </ul>
-          </motion.div>
-        ))}
-      </div>
+      </motion.div>
     </div>
   )
 }
