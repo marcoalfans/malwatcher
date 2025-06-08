@@ -273,7 +273,7 @@ export function HeroSection() {
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4">
-              <Link href="#upload" className="w-full sm:w-auto">
+              <Link href="#scan" className="w-full sm:w-auto">
                 <Button
                   size="lg"
                   className="w-full gap-2 transition-all duration-300 bg-gradient-to-r from-primary to-secondary hover:from-secondary hover:to-primary"

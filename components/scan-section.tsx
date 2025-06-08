@@ -5,48 +5,93 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Loader2 } from "lucide-react"
+import vtScan from "@/lib/vt-scan"
 
 export function ScanSection() {
   
   const [file, setFile] = useState<File | null>(null)
   const [url, setUrl] = useState<string>("")
+  const [loading, setLoading] = useState(false)
+
+  const MAX_FILE_SIZE_MB = 32
+  const isFileTooLarge = file ? file.size / (1024 * 1024) > MAX_FILE_SIZE_MB : false
+
+  const pad = (n: number) => n.toString().padStart(2, '0')
+
+  const saveJsonFile = (data: any, fileName: string) => {
+    const date = new Date()
+    const formattedDate = `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}_${pad(date.getHours())}${pad(date.getMinutes())}`
+
+    const jsonBlob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" })
+    const downloadUrl = URL.createObjectURL(jsonBlob)
+
+    const a = document.createElement("a")
+    a.href = downloadUrl
+    a.download = `${formattedDate}_file_${fileName}.json`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(downloadUrl)
+  }
+
+  const saveLogToServer = async (data: any, fileName: string) => {
+    const date = new Date()
+    const timestamp = `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}_${pad(date.getHours())}${pad(date.getMinutes())}`
+    const fullFileName = `${timestamp}_file_${fileName}.json`
+    const urlsave = '/api/save-log'.replace(/\/+$/, '') // safe URL tanpa trailing slash
+
+    await fetch(urlsave, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ data, filename: fullFileName })
+    })
+  }
+
 
   const handleFileUpload = async () => {
-    if (!file) return
+    if (!file || isFileTooLarge) return
     try {
-      const formData = new FormData()
-      formData.append("file", file)
-      const response = await fetch("/api/virustotal/files", {
-        method: "POST",
-        headers: {
-          "x-apikey": "062c041db9838c89f22ef3e5384ecf6e02f636943de399933233c7aab8c320b4"
-        },
-        body: formData
-      })
-      const result = await response.json()
-      console.log("File Scan Result:", result)
-    } catch (err) {
-      console.error("File Upload Error:", err)
+      setLoading(true)
+      // Step 1: Upload file
+      const res = await vtScan.postFiles({ file })
+      const analysisId = res?.data?.id
+      // Step 2: Poll analysis
+      if (analysisId) {
+        const analysis = await vtScan.pollAnalysis(analysisId)
+        // Step 3: Extract hash
+        const meta = analysis?.meta?.file_info
+        if (meta) {
+        const behaviours = await vtScan.getBehaviours(meta)
+          console.log("[Malwatcher][File Behaviours]", behaviours)
+          saveJsonFile(behaviours, file.name)
+          await saveLogToServer(behaviours, file.name)
+        }  
+      }
+    } catch (error) {
+      console.error("[Malwatcher][File Error]", error)
+    } finally {
+      setLoading(false)
     }
   }
 
   const handleUrlScan = async () => {
-    if (!url) return
-    try {
-      const response = await fetch("/api/virustotal/url", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-apikey": "062c041db9838c89f22ef3e5384ecf6e02f636943de399933233c7aab8c320b4"
-        },
-        body: JSON.stringify({ url })
-      })
-      const result = await response.json()
-      console.log("URL Scan Result:", result)
-    } catch (err) {
-      console.error("URL Scan Error:", err)
+  if (!url) return
+  try {
+    setLoading(true)
+    // Step 1: Submit URL ke VirusTotal
+    const res = await vtScan.scanUrl({ url })
+    const analysisId = res?.data?.id
+    // Step 2: Jika ada ID, ambil hasil analisisnya
+    if (analysisId) {
+      const analysis = await vtScan.pollAnalysis(analysisId)
     }
+  } catch (error) {
+    console.error("[Malwatcher][URL Error]", error)
+  } finally {
+    setLoading(false)
   }
+}
 
   return (
     <div className="container px-4 py-16 mx-auto max-w-7xl" id="scan">
@@ -96,12 +141,18 @@ export function ScanSection() {
               </span>
             </div>
             {file && (
-            <p className="text-sm text-muted-foreground text-right text-primary">
-              {(file.size / 1024).toFixed(1)} KB
-            </p>
-          )}
+              isFileTooLarge ? (
+                <p className="text-sm text-destructive text-left">Cannot be scanned: file is bigger than 32MB</p>
+              ) : (
+                <p className="text-sm text-muted-foreground text-right text-primary">
+                  {(file.size / 1024).toFixed(1)} KB
+                </p>
+              )
+            )}
           <div className="flex justify-center">
-            <Button className="text-md font-semibold min-h-[28px]" onClick={handleFileUpload} disabled={!file}>Scan File</Button>
+            <Button className="text-md font-semibold min-h-[28px]" onClick={handleFileUpload} disabled={!file || loading || isFileTooLarge}>
+              {loading ? <><Loader2 className="w-4 h-4 animate-spin mr-2" />Scanning...</> : "Scan File"}
+              </Button>
           </div>
         </TabsContent>
         <TabsContent value="url" className="mt-6 space-y-4 text-center">
@@ -118,7 +169,8 @@ export function ScanSection() {
             onChange={(e) => setUrl(e.target.value)}
           />
           <div className="flex justify-center">
-            <Button className="text-md font-semibold min-h-[28px]" onClick={handleUrlScan} disabled={!url}>Scan URL</Button>
+            <Button className="text-md font-semibold min-h-[28px]" onClick={handleUrlScan} disabled={!url || loading}>
+              {loading ? <><Loader2 className="w-4 h-4 animate-spin mr-2" />Scanning...</> : "Scan URL"}</Button>
           </div>
         </TabsContent>
       </Tabs>

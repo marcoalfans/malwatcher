@@ -56,7 +56,7 @@ export const viewport: Viewport = {
   ],
 }
 
-const baseUrl = (process.env.NEXT_PUBLIC_BASE_URL || 'https://http://localhost:3000/') + (process.env.NEXT_PUBLIC_BASE_PATH || '')
+const baseUrl = (process.env.NEXT_PUBLIC_BASE_URL || 'https://http://localhost:3000') + (process.env.NEXT_PUBLIC_BASE_PATH || '')
 export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),
   title: {

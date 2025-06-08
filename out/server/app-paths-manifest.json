@@ -1,3 +1,4 @@
 {
+  "/api/save-log/route": "app/api/save-log/route.js",
   "/page": "app/page.js"
 }
