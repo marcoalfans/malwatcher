@@ -21,10 +21,15 @@
       "static/chunks/main-app.js",
       "static/chunks/app/page.js"
     ],
-    "/api/save-log/route": [
+    "/_not-found/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/api/save-log/route.js"
+      "static/chunks/app/_not-found/page.js"
+    ],
+    "/scan-result/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/scan-result/page.js"
     ]
   }
 }

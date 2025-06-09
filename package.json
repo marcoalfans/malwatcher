@@ -66,6 +66,7 @@
     "react-dom": "^19",
     "react-hook-form": "latest",
     "react-intersection-observer": "latest",
+    "react-json-tree": "^0.20.0",
     "react-particles": "latest",
     "react-resizable-panels": "latest",
     "react-type-animation": "latest",
