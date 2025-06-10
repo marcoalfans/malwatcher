@@ -1,5 +1,6 @@
 "use client"
 
+import { motion } from "framer-motion"
 import { memo, useMemo, Suspense, lazy, useEffect } from "react"
 import Link from "next/link"
 import { LoadingSpinner } from "@/components/loading-spinner"
@@ -14,9 +15,30 @@ const ExperienceSection = lazy(() => import("@/components/experience-section").t
 
 // Memoized About section component
 const AboutSection = memo(() => (
-      <div className="container px-4 py-8 mx-auto max-w-7xl" id="about">
+      <div className="container px-4 py-16 mx-auto max-w-7xl" id="about">
+        <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        viewport={{ once: false }}
+        className="mb-12 text-center"
+      >
         <h2 className="mb-8 text-3xl font-bold tracking-tight">About This Project</h2>
+        </motion.div>
         <div className="grid gap-8 md:grid-cols-2">
+          <motion.div
+              initial={{ opacity: 0, x: 0 }}
+              whileInView={{ opacity: 1, x: 30 }}
+              transition={{ 
+                duration: 0.4,
+                ease: "easeOut"
+              }}
+              viewport={{ once: false }}
+              whileHover={{ 
+                y: -5,
+                transition: { duration: 0.2, ease: "easeOut" }
+              }}
+            >
           <div className="margin-right:-10rem; space-y-4">
             <p className="text-base">
               Malwatcher is a TypeScript-based web project designed to perform malware analysis in a simple yet effective way. The application allows users to upload suspicious files and run inspection processes through a clean and responsive web interface.
@@ -49,7 +71,21 @@ const AboutSection = memo(() => (
               {" "}
             </p>
           </div>
+          </motion.div>
           <div className="flex items-center justify-center">
+            <motion.div
+              initial={{ opacity: 0, x: 30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ 
+                duration: 0.4,
+                ease: "easeOut"
+              }}
+              viewport={{ once: false }}
+              whileHover={{ 
+                y: -5,
+                transition: { duration: 0.2, ease: "easeOut" }
+              }}
+            >
             <div className="relative w-64 h-64 overflow-hidden rounded-full border-4 border-primary/20">
               <FallbackImage
                 src="https://avatars.githubusercontent.com/u/60995418"
@@ -60,6 +96,7 @@ const AboutSection = memo(() => (
                 priority
               />
             </div>
+          </motion.div>
           </div>
         </div>
       </div>

@@ -19,7 +19,7 @@ const navItems = [
   { name: "About", path: "/#about", icon: <BookOpen className="w-4 h-4" /> },
   { name: "Scan", path: "/#scan", icon: <ScanText className="w-4 h-4" /> },
   { name: "Experience", path: "/#experience", icon: <ChartNoAxesCombined className="w-4 h-4" /> },
-  { name: "Projects", path: "/#projects", icon: <Logs className="w-4 h-4" /> },
+  { name: "Logs", path: "/scan-result", icon: <Logs className="w-4 h-4" /> },
   { name: "CTF", path: "/#ctf", icon: <Shield className="w-4 h-4" /> },
   { name: "Search", path: "/search", icon: <Search className="w-4 h-4" /> },
 ]

@@ -22,13 +22,13 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/#projects" className="text-muted-foreground hover:text-foreground">
-                  Projects
+                <Link href="/#scan" className="text-muted-foreground hover:text-foreground">
+                  Scan
                 </Link>
               </li>
               <li>
-                <Link href="/#experience" className="text-muted-foreground hover:text-foreground">
-                  Experience
+                <Link href="/scan-result" className="text-muted-foreground hover:text-foreground">
+                  Logs
                 </Link>
               </li>
               <li>

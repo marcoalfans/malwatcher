@@ -94,12 +94,12 @@ export function ScanSection() {
 }
 
   return (
-    <div className="container px-4 py-16 mx-auto max-w-7xl" id="scan">
+    <div className="container px-4 py-16 mb-20 mx-auto max-w-7xl" id="scan">
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        viewport={{ once: true }}
+        viewport={{ once: false }}
         className="mb-12 text-center"
       >
         <h2 className="text-5xl font-bold tracking-tight neon-text-green">Curious About That File or Link?</h2>
@@ -109,7 +109,7 @@ export function ScanSection() {
         initial={{ opacity: 0, y: 30 }}
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        viewport={{ once: true }}
+        viewport={{ once: false }}
       >
       <Tabs defaultValue="file" className="w-full max-w-xl mx-auto">
         <TabsList className="grid w-full grid-cols-2">

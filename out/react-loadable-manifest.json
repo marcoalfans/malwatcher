@@ -1,4 +1,10 @@
 {
+  "app\\search\\page.tsx -> @/components/search-bar": {
+    "id": "app\\search\\page.tsx -> @/components/search-bar",
+    "files": [
+      "static/chunks/_app-pages-browser_components_search-bar_tsx.js"
+    ]
+  },
   "components\\header.tsx -> @/components/theme-toggle": {
     "id": "components\\header.tsx -> @/components/theme-toggle",
     "files": [

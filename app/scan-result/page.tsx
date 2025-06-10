@@ -1,8 +1,10 @@
 // app/scan-result/page.ts
+
 import fs from 'fs'
 import path from 'path'
 import { ResultCard } from '@/components/result-card'
 import { ResultNavigation } from '@/components/result-navigation'
+import { ResultPageClient } from '@/components/result-page-client'
 
 export default function ScanResultPage() {
   const logDir = path.join(process.cwd(), 'logs')
@@ -15,14 +17,15 @@ export default function ScanResultPage() {
   })
 
   return (
-    <div className="container py-10">
-      <h1 className="text-3xl font-bold mb-6">🦠 Scan Result Viewer</h1>
-      <ResultNavigation logs={results.map(r => ({ filename: r.filename }))} />
-      {results.map((r) => (
-        <div key={r.filename} className="mb-10">
-          <ResultCard filename={r.filename} data={r.data} />
-        </div>
-      ))}
-    </div>
+    <ResultPageClient results={results}/>
+    // <div className="container py-10">
+    //   <h1 className="text-3xl font-bold mb-6">🦠 Scan Result Viewer</h1>
+    //   <ResultNavigation logs={results.map(r => ({ filename: r.filename }))} />
+    //   {results.map((r) => (
+    //     <div key={r.filename} className="mb-10">
+    //       <ResultCard filename={r.filename} data={r.data} />
+    //     </div>
+    //   ))}
+    // </div>
   )
 }

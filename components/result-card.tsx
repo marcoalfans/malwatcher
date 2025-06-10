@@ -51,7 +51,7 @@ export function ResultCard({ filename, data }: ResultCardProps) {
     data?.data
       ?.flatMap(item => item.attributes?.verdicts?? [])
       ?.filter((v, i, arr) => arr.indexOf(v) === i) ?? []
-  const verdictText = allVerdicts.length > 0 ? allVerdicts.join(", ") : "NOT FOUND"
+  const verdictText = allVerdicts.length > 0 ? allVerdicts.join(", ") : "NOT FOUND 🔎"
 
   // Kelompokkan MITRE berdasarkan severity
   const mitres = data?.data?.flatMap(item => item.attributes?.mitre_attack_techniques ?? []) ?? []
