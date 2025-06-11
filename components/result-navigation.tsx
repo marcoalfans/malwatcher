@@ -12,20 +12,21 @@ export function ResultNavigation({ logs }: ResultNavigationProps) {
 
   return (
     <div className="flex overflow-x-auto space-x-4 mb-6">
-      {logs.map((log) => (
-        <button
-          key={log.filename}
-          onClick={() => setActive(log.filename)}
-          className={cn(
-            "px-4 py-2 text-sm rounded-md border",
-            active === log.filename
-              ? "bg-primary text-white border-primary"
-              : "bg-muted text-muted-foreground border-muted"
-          )}
-        >
-          {log.filename}
-        </button>
-      ))}
-    </div>
+  {logs.map((log) => (
+    <button
+      key={log.filename}
+      onClick={() => setActive(log.filename)}
+      className={cn(
+        "px-4 py-2 text-sm rounded-md border",
+        "max-w-[300px] whitespace-nowrap overflow-hidden text-ellipsis", // <-- Tambahkan kelas ini
+        active === log.filename
+          ? "bg-primary text-white border-primary"
+          : "bg-muted text-muted-foreground border-muted"
+      )}
+    >
+      {log.filename}
+    </button>
+  ))}
+</div>
   )
 }

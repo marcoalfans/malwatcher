@@ -1419,6 +1419,10 @@ video {
   margin-top: 2rem;
   margin-bottom: 2rem;
 }
+.mx-3 {
+  margin-left: 0.75rem;
+  margin-right: 0.75rem;
+}
 .-ml-4 {
   margin-left: -1rem;
 }
@@ -1508,6 +1512,9 @@ video {
 }
 .mb-20 {
   margin-bottom: 5rem;
+}
+.mt-5 {
+  margin-top: 1.25rem;
 }
 .line-clamp-2 {
   overflow: hidden;
@@ -1801,6 +1808,12 @@ video {
 .max-w-xs {
   max-width: 20rem;
 }
+.max-w-\[200px\] {
+  max-width: 200px;
+}
+.max-w-\[300px\] {
+  max-width: 300px;
+}
 .flex-1 {
   flex: 1 1 0%;
 }
@@ -2079,6 +2092,9 @@ video {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+.text-ellipsis {
+  text-overflow: ellipsis;
+}
 .whitespace-nowrap {
   white-space: nowrap;
 }
@@ -2327,6 +2343,21 @@ video {
 }
 .bg-yellow-500\/20 {
   background-color: rgb(234 179 8 / 0.2);
+}
+.bg-blue-500\/40 {
+  background-color: rgb(59 130 246 / 0.4);
+}
+.bg-gray-500\/40 {
+  background-color: rgb(107 114 128 / 0.4);
+}
+.bg-orange-500\/40 {
+  background-color: rgb(249 115 22 / 0.4);
+}
+.bg-red-600\/40 {
+  background-color: rgb(220 38 38 / 0.4);
+}
+.bg-yellow-400\/40 {
+  background-color: rgb(250 204 21 / 0.4);
 }
 .bg-\[url\(\'data\:image\/svg\+xml\;base64\2c PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICAgIDxnIGZpbGw9Im5vbmUiIGZpbGwtcnVsZT0iZXZlbm9kZCI\+CiAgICAgICAgPGcgZmlsbD0iI2ZmZiIgZmlsbC1vcGFjaXR5PSIwLjEiPgogICAgICAgICAgICA8cGF0aCBkPSJNMzYgMzBoLTZsMyAxMHoiLz4KICAgICAgICAgICAgPHBhdGggZD0iTTMwIDMwaC02bDMgMTB6Ii8\+CiAgICAgICAgPC9nPgogICAgPC9nPgo8L3N2Zz4\=\'\)\] {
   background-image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICAgIDxnIGZpbGw9Im5vbmUiIGZpbGwtcnVsZT0iZXZlbm9kZCI+CiAgICAgICAgPGcgZmlsbD0iI2ZmZiIgZmlsbC1vcGFjaXR5PSIwLjEiPgogICAgICAgICAgICA8cGF0aCBkPSJNMzYgMzBoLTZsMyAxMHoiLz4KICAgICAgICAgICAgPHBhdGggZD0iTTMwIDMwaC02bDMgMTB6Ii8+CiAgICAgICAgPC9nPgogICAgPC9nPgo8L3N2Zz4=');
@@ -2640,6 +2671,10 @@ video {
 .text-xs {
   font-size: 0.75rem;
   line-height: 1rem;
+}
+.\!text-base {
+  font-size: 1rem !important;
+  line-height: 1.5rem !important;
 }
 .font-bold {
   font-weight: 700;
@@ -4241,6 +4276,26 @@ pre[class*="language-"] {
   background-color: rgb(234 179 8 / 0.8);
 }
 
+.hover\:bg-blue-600\/90:hover {
+  background-color: rgb(37 99 235 / 0.9);
+}
+
+.hover\:bg-gray-600\/90:hover {
+  background-color: rgb(75 85 99 / 0.9);
+}
+
+.hover\:bg-orange-600\/90:hover {
+  background-color: rgb(234 88 12 / 0.9);
+}
+
+.hover\:bg-red-700\/90:hover {
+  background-color: rgb(185 28 28 / 0.9);
+}
+
+.hover\:bg-yellow-500\/90:hover {
+  background-color: rgb(234 179 8 / 0.9);
+}
+
 .hover\:from-secondary:hover {
   --tw-gradient-from: hsl(var(--secondary)) var(--tw-gradient-from-position);
   --tw-gradient-to: hsl(var(--secondary) / 0) var(--tw-gradient-to-position);
@@ -5250,6 +5305,18 @@ pre[class*="language-"] {
 
   .sm\:p-6 {
     padding: 1.5rem;
+  }
+
+  .sm\:p-1 {
+    padding: 0.25rem;
+  }
+
+  .sm\:p-3 {
+    padding: 0.75rem;
+  }
+
+  .sm\:p-2 {
+    padding: 0.5rem;
   }
 
   .sm\:px-4 {
