@@ -63,6 +63,7 @@ const extensionDescriptions: Record<string, string> = {
   ".jpg": "JPEG Image",
   ".jpeg": "JPEG Image",
   ".gif": "Graphics Interchange Format",
+  ".svg": "Scalable Vector Graphics",
   ".mp3": "MP3 Audio File",
   ".mp4": "MPEG-4 Video File",
   ".avi": "Audio Video Interleave",
@@ -83,6 +84,11 @@ const extensionDescriptions: Record<string, string> = {
   ".dll": "Dynamic Link Library",
   ".sys": "System File",
   ".tmp": "Temporary File",
+  ".bat": "Windows Batch File",
+  ".ps1": "PowerShell Script",
+  ".sh": "Shell Script",
+  ".bak": "Backup File",
+  ".reg": "Windows Registry File",
   // Tambahkan ekstensi lain sesuai kebutuhan Anda
 };
 
