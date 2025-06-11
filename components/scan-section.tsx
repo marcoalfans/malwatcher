@@ -7,9 +7,11 @@ import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Loader2 } from "lucide-react"
 import vtScan from "@/lib/vt-scan"
+import path from 'path';
+import { useRouter } from 'next/navigation';
 
 export function ScanSection() {
-  
+  const router = useRouter(); // Inisialisasi router
   const [file, setFile] = useState<File | null>(null)
   const [url, setUrl] = useState<string>("")
   const [loading, setLoading] = useState(false)
@@ -59,13 +61,25 @@ export function ScanSection() {
       // Step 2: Poll analysis
       if (analysisId) {
         const analysis = await vtScan.pollAnalysis(analysisId)
-        // Step 3: Extract hash
+        // Step 3: Extract hashes from metadata
         const meta = analysis?.meta?.file_info
         if (meta) {
+          // Step 4: Get behaviours using available hash
         const behaviours = await vtScan.getBehaviours(meta)
-          console.log("[Malwatcher][File Behaviours]", behaviours)
-          saveJsonFile(behaviours, file.name)
-          await saveLogToServer(behaviours, file.name)
+        // Step 5: Combine analysis + behaviours into single object
+        const combinedResult = {
+          type: 'file-scan',
+          filename: file.name,
+          fileExtension: path.extname(file.name),
+          timestamp: new Date().toISOString(),
+          analysis,
+          behaviours,
+        }
+          // Step 6: Save to local download and to /logs folder via API
+          console.log("[Malwatcher][Analysis + Behav]", combinedResult)
+          // saveJsonFile(combinedResult, file.name)
+          await saveLogToServer(combinedResult, file.name)
+          router.push('/scan-result');
         }  
       }
     } catch (error) {
