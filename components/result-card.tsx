@@ -3,25 +3,32 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import { Calendar, File, Sparkles } from "lucide-react"
+import { Calendar, File, Gauge, ShieldAlert, ShieldQuestion, Sparkles } from "lucide-react"
 import { format } from "date-fns"
 import { enUS } from "date-fns/locale"
-import { motion, MotionProps } from "framer-motion";
+import { motion, MotionProps, number } from "framer-motion";
 
 interface VTAnalBehavData {
   filename: string
   timestamp: string
   fileExtension: string
-  analysis: {
-    meta?: {
-      file_info?: {
+  detailsFile: {
+    data?: {
+      attributes?: {
+        reputation?: number
+        type_extension?: string
+        type_tags?: string[]
         md5?: string
         sha1?: string
         sha256?: string
-      }
-    }
-    data?: {
-      attributes?: {
+        popular_threat_classification:{
+          suggested_threat_label: string
+        }
+        crowdsourced_yara_results?:{
+          ruleset_name?: string
+          rule_name?: string
+          description?: string          
+        }[]
         stats?: Record<string, number>
       }
     }
@@ -51,48 +58,6 @@ interface ResultCardProps extends MotionProps{
   onClick?: () => void; // MotionProps sudah mencakup onClick
 }
 
-// Kamus data untuk deskripsi ekstensi
-const extensionDescriptions: Record<string, string> = {
-  ".exe": "Executable",
-  ".zip": "Compressed Archive",
-  ".gz": "Gnu Zip Archive",
-  ".pdf": "Portable Document Format",
-  ".docx": "Microsoft Word Document",
-  ".txt": "Plain Text File",
-  ".png": "Portable Network Graphics",
-  ".jpg": "JPEG Image",
-  ".jpeg": "JPEG Image",
-  ".gif": "Graphics Interchange Format",
-  ".svg": "Scalable Vector Graphics",
-  ".mp3": "MP3 Audio File",
-  ".mp4": "MPEG-4 Video File",
-  ".avi": "Audio Video Interleave",
-  ".rar": "Roshal ARchive",
-  ".7z": "7-Zip Archive",
-  ".iso": "Disc Image",
-  ".dmg": "Apple Disk Image",
-  ".ppt": "Microsoft PowerPoint Presentation",
-  ".pptx": "Microsoft PowerPoint Presentation",
-  ".xls": "Microsoft Excel Spreadsheet",
-  ".xlsx": "Microsoft Excel Spreadsheet",
-  ".html": "Hypertext Markup Language",
-  ".htm": "Hypertext Markup Language",
-  ".css": "Cascading Style Sheet",
-  ".js": "JavaScript File",
-  ".json": "JavaScript Object Notation",
-  ".xml": "Extensible Markup Language",
-  ".dll": "Dynamic Link Library",
-  ".sys": "System File",
-  ".tmp": "Temporary File",
-  ".bat": "Windows Batch File",
-  ".ps1": "PowerShell Script",
-  ".sh": "Shell Script",
-  ".bak": "Backup File",
-  ".reg": "Windows Registry File",
-  // Tambahkan ekstensi lain sesuai kebutuhan Anda
-};
-
-
 // Buat komponen MotionCard yang membungkus Card dari Shadcn UI
 const MotionCard = motion(Card);
 export function ResultCard({ filename, data, children, className, onClick, // Destructure semua props, termasuk yang dari MotionProps
@@ -101,12 +66,9 @@ export function ResultCard({ filename, data, children, className, onClick, // De
   const formattedTimestamp = data.timestamp
     ? format(new Date(data.timestamp), 'dd MMMM yyyy HH:mm', { locale: enUS }) // Contoh format dengan lokal Indonesia
     : "unknown";
-  const fileExtension = data.fileExtension || '';
-  const cleanedExtension = fileExtension.toLowerCase(); // Konversi ke lowercase untuk pencarian yang konsisten
-  const description = extensionDescriptions[cleanedExtension] || ""; // Dapatkan deskripsi, default ''
-  const md5 = data.analysis.meta?.file_info?.md5 || "-"
-  const sha1 = data.analysis.meta?.file_info?.sha1 || "-"
-  const sha256 = data.analysis.meta?.file_info?.sha256 || "-"
+  const md5 = data.detailsFile.data?.attributes?.md5 || "-"
+  const sha1 = data.detailsFile.data?.attributes?.sha1 || "-"
+  const sha256 = data.detailsFile.data?.attributes?.sha256 || "-"
 
   // Ambil dan gabungkan semua verdict unik
   const allVerdicts: string[] =
@@ -163,6 +125,32 @@ export function ResultCard({ filename, data, children, className, onClick, // De
     return acc
   }, {} as Record<string, { title: string }[]>)
 
+  // --- Variabel untuk YARA Rules ---
+const yaraResults = data?.detailsFile.data?.attributes?.crowdsourced_yara_results ?? [];
+
+// Objek untuk menyimpan YARA rules yang dikelompokkan
+const groupedYara: Record<string, { rule_name?: string; description?: string }[]> = yaraResults.reduce((acc, rule) => {
+const rulesetName = rule.ruleset_name?.trim() || "unknown_ruleset";
+
+  // Pastikan `acc[rulesetName]` adalah sebuah array sebelum mendorong elemen
+  if (!acc[rulesetName]) {
+    acc[rulesetName] = [];
+  }
+
+  // Tambahkan rule ke array rulesetName tersebut
+  // Hanya ambil properti rule_name dan description yang relevan untuk tooltip
+  if (rule.rule_name && !acc[rulesetName].some(r => r.rule_name === rule.rule_name)) {
+    acc[rulesetName].push({
+      rule_name: rule.rule_name,
+      description: rule.description,
+    });
+  }
+  return acc;
+}, {} as Record<string, { rule_name?: string; description?: string }[]>); // <-- Penting: berikan tipe eksplisit pada initialValue
+
+// Array untuk menjaga urutan ruleset (opsional, jika Anda ingin urutan spesifik)
+const yaraRulesetOrder = Object.keys(groupedYara).sort(); // Mengurutkan secara alfabetis sebagai contoh
+
   return (
     <MotionCard
       className={className} 
@@ -177,11 +165,32 @@ export function ResultCard({ filename, data, children, className, onClick, // De
                       <span>{formattedTimestamp}</span>
                     </div>
                     <div className="flex items-center gap-1 mx-1">
-                      <File className="w-4 h-4" />
-                      <span>{data.filename} ({description})</span>
+                      <ShieldAlert className="w-4 h-4" />
+                      <span>Threat Labeled: {data.detailsFile.data?.attributes?.popular_threat_classification?.suggested_threat_label}</span>
+                    </div>
+                    <div className="flex items-center gap-1 mx-1">
+                      <Gauge className="w-4 h-4" />
+                      <span>Score: {data.detailsFile.data?.attributes?.reputation}</span>
                     </div>
         </div>
-        <div className="flex flex-wrap gap-2 mt-2">
+        <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
+                    <div className="flex items-center gap-1 mx-1">
+                      <File className="w-4 h-4" />
+                      <span>.{data.detailsFile.data?.attributes?.type_extension}</span>
+                    </div>
+                    {/* Memastikan type_tags ada sebelum memprosesnya */}
+                    {data.detailsFile.data?.attributes?.type_tags && (
+                      <div className="flex items-center gap-1 mx-1">
+                        {/* Melakukan map (iterasi) pada array type_tags */}
+                        {data.detailsFile.data.attributes.type_tags.map((tag, index) => (
+                          <Badge key={index} className="text-xs mx-0 cursor-pointer" style={{ backgroundColor: 'rgba(0, 123, 255, 0.5)'}}>
+                            {tag}
+                          </Badge>
+                        ))}
+                    </div>
+            )}
+        </div>
+        <div className="flex flex-wrap gap-2 mt-2"> 
           <Badge variant="outline">MD5: <span className="mx-1 text-muted-foreground">{md5 || "-"}</span></Badge>
           <Badge variant="outline">SHA1: <span className="mx-1 text-muted-foreground">{sha1 || "-"}</span></Badge>
           <Badge variant="outline">SHA256: <span className="mx-1 text-muted-foreground">{sha256 || "-"}</span></Badge>
@@ -235,6 +244,41 @@ export function ResultCard({ filename, data, children, className, onClick, // De
                 </Tooltip>
               </TooltipProvider>
             ))}
+        </div>
+        {/* YARA */}
+        <div className="">
+          <span className="font-semibold">YARA Rules:</span>
+          {yaraRulesetOrder
+            .filter(rulesetName => groupedYara[rulesetName] && groupedYara[rulesetName].length > 0)
+            .map((rulesetName) => (
+              <TooltipProvider key={rulesetName}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Badge className="text-xs mx-1 cursor-pointer bg-red-500 text-white bg-opacity-50" >
+                      {rulesetName}
+                    </Badge>
+                  </TooltipTrigger>
+                  <TooltipContent className="max-w-xs">
+                    <ul className="text-xs">
+                      {groupedYara[rulesetName].map((yaraRule, idx) => (
+                        <li key={idx} className="mb-1 last:mb-0">
+                          <strong>Rule:</strong> {yaraRule.rule_name || 'N/A'}
+                          {yaraRule.description && (
+                            <>
+                              <br />
+                              <strong>Desc:</strong> {yaraRule.description}
+                            </>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            ))}
+          {yaraRulesetOrder.length === 0 && (
+            <span className="text-sm text-muted-foreground ml-2">No YARA rules detected.</span>
+          )}
         </div>
 
         {/* Children (e.g. expandable VT link) */}

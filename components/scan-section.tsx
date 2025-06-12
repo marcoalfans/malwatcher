@@ -65,14 +65,14 @@ export function ScanSection() {
         const meta = analysis?.meta?.file_info
         if (meta) {
           // Step 4: Get behaviours using available hash
+        const detailsFile = await vtScan.getDetails(meta)
         const behaviours = await vtScan.getBehaviours(meta)
         // Step 5: Combine analysis + behaviours into single object
         const combinedResult = {
           type: 'file-scan',
           filename: file.name,
-          fileExtension: path.extname(file.name),
           timestamp: new Date().toISOString(),
-          analysis,
+          detailsFile,
           behaviours,
         }
           // Step 6: Save to local download and to /logs folder via API

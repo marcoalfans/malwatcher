@@ -78,6 +78,34 @@ const vtScan = {
       await new Promise(resolve => setTimeout(resolve, delay))
     }
     throw new Error('Analysis did not complete in time.')
+  },  
+getDetails: async (meta: { sha256?: string; sha1?: string; md5?: string }, limit: number = 10, retries = 10, delay = 3000) => {
+    const hashes = [meta.sha256, meta.sha1, meta.md5].filter(Boolean)
+
+    for (const hash of hashes) {
+      for (let i = 0; i < retries; i++) {
+        try {
+          const response = await axios.get(`${API_BASE}/files/${hash}`, {
+            headers: {
+              'x-apikey': API_KEY,
+              'accept': 'application/json'
+            }
+          })
+          console.log(`[VT Scan][Details] (${hash}) Response:`, response.data)
+          return response.data
+        } catch (err: any) {
+          if (err.response?.status === 404) {
+            console.warn(`[VT Scan][Details] Try ${i + 1}: ${hash} not ready yet`)
+            await new Promise(resolve => setTimeout(resolve, delay))
+          } else {
+            console.error('[VT Scan][Details] Error:', err)
+            throw err
+          }
+        }
+      }
+    }
+
+    throw new Error('Could not fetch Details for any provided hash.')
   },
   getBehaviours: async (meta: { sha256?: string; sha1?: string; md5?: string }, limit: number = 10, retries = 10, delay = 3000) => {
     const hashes = [meta.sha256, meta.sha1, meta.md5].filter(Boolean)

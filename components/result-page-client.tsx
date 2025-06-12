@@ -6,20 +6,27 @@ import { ResultNavigation } from "@/components/result-navigation"
 import { ResultCard} from "@/components/result-card"
 import { motion, AnimatePresence } from "framer-motion" 
 
+
 interface VTAnalBehavData {
   filename: string
   timestamp: string
   fileExtension: string
-  analysis: {
-    meta?: {
-      file_info?: {
+  detailsFile: {
+    data?: {
+      attributes?: {
+        reputation?: number
+        type_extension?: string
+        type_tags?: string[]
         md5?: string
         sha1?: string
         sha256?: string
-      }
-    }
-    data?: {
-      attributes?: {
+        popular_threat_classification:{
+          suggested_threat_label: string
+        }
+        crowdsourced_yara_results?:{
+          rule_name?: string
+          description?: string          
+        }[]
         stats?: Record<string, number>
       }
     }
@@ -120,7 +127,7 @@ export function ResultPageClient({ results }: Props) {
 
       <div className="relative border-l-2 border-muted pl-8 ml-4">
         {sortedResults.map((r, index) => {
-          const metadata = r.data?.analysis.meta?.file_info?.md5 || r.data?.analysis.meta?.file_info?.sha256 || "-";
+          const metadata = r.data?.detailsFile.data?.attributes?.md5 || r.data?.detailsFile.data?.attributes?.sha256 || "-";
           return (
             <div
               key={r.filename}
