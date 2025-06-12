@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { Github, Twitter, Linkedin, Mail, FileText } from "lucide-react"
+import { Github, Twitter, Linkedin, Mail, FileText, BookOpen, ScanText, Logs } from "lucide-react"
 import { withBasePath } from "@/lib/utils"
 
 export function Footer() {
@@ -17,24 +17,21 @@ export function Footer() {
             <h3 className="font-semibold mb-4">Quick Links</h3>
             <ul className="space-y-3">
               <li>
-                <Link href="/#about" className="text-muted-foreground hover:text-foreground">
+                <Link href="/#about" className="flex items-center gap-2 text-muted-foreground hover:text-foreground">
+                 <BookOpen className="w-4 h-4" />
                   About
                 </Link>
               </li>
               <li>
-                <Link href="/#scan" className="text-muted-foreground hover:text-foreground">
+                <Link href="/#scan" className="flex items-center gap-2 text-muted-foreground hover:text-foreground">
+                 <ScanText className="w-4 h-4" /> 
                   Scan
                 </Link>
               </li>
               <li>
-                <Link href="/scan-result" className="text-muted-foreground hover:text-foreground">
+                <Link href="/scan-result" className="flex items-center gap-2 text-muted-foreground hover:text-foreground">
+                <Logs className="w-4 h-4" /> 
                   Logs
-                </Link>
-              </li>
-              <li>
-                <Link href={"/blog"} className="flex items-center gap-2 text-muted-foreground hover:text-foreground">
-                  <FileText className="w-4 h-4" />
-                  Blog
                 </Link>
               </li>
             </ul>
