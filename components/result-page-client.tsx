@@ -6,7 +6,6 @@ import { ResultNavigation } from "@/components/result-navigation"
 import { ResultCard} from "@/components/result-card"
 import { motion, AnimatePresence } from "framer-motion" 
 
-
 interface VTAnalBehavData {
   filename: string
   timestamp: string
