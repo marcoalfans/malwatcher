@@ -329,7 +329,7 @@ export function HeroSection() {
                 }}
               >
                 {activeTab === "hacker" && (
-                  <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="absolute inset-0 mx-3 lex items-center justify-center bg-gradient-to-br to-blue-800/20 from-blue-900/20">
                     <div className="w-full max-w-md p-6 rounded-lg retro-terminal scanlines">
                       <div className="text-sm">
                         <span className="text-green-400">root@kali:~#</span>{" "}
@@ -484,7 +484,7 @@ drwxr-xr-x 10 root kali 4096 May 22 06:23 ..
                 )}
 
                 {activeTab === "student" && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-pink-900/50 to-purple-900/50">
+                  <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-blue-900/50 to-purple-900/50">
                     <div className="w-full max-w-md manga-panel bg-white">
                       <div className="p-6">
                         <div className="mb-4 text-center">
