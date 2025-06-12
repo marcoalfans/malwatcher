@@ -7,8 +7,91 @@ import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Loader2 } from "lucide-react"
 import vtScan from "@/lib/vt-scan"
-import path from 'path';
 import { useRouter } from 'next/navigation';
+
+// Interface untuk item individu di dalam behaviours.data
+interface BehaviourDataItem {
+  attributes?: {
+    verdicts?: string[];
+    mitre_attack_techniques?: {
+      id?: string[] | string;
+      severity?: string;
+      signature_description?: string;
+    }[];
+    sigma_analysis_results?: {
+      rule_level?: string;
+      rule_title?: string;
+    }[];
+  };
+}
+
+// Interface untuk atribut detailsFile dari VirusTotal
+interface DetailsFileAttributes {
+  reputation?: number;
+  type_extension?: string;
+  type_tags?: string[];
+  md5?: string;
+  sha1?: string;
+  sha256?: string;
+  popular_threat_classification?: { 
+    suggested_threat_label?: string; 
+  };
+  crowdsourced_yara_results?: {
+    ruleset_id?: string;
+    ruleset_version?: string;
+    ruleset_name?: string;
+    rule_name?: string;
+    match_date?: number;
+    description?: string;
+    author?: string;
+    source?: string;
+  }[];
+  stats?: Record<string, number>;
+}
+interface DetailsFileResponse {
+  data?: {
+    attributes?: DetailsFileAttributes;
+  };
+}
+
+// Interface untuk hasil scan gabungan yang dibuat di handleFileUpload
+interface CombinedScanResult {
+  type: 'file-scan' | 'url-scan';
+  filename: string;
+  timestamp: string;
+  fileExtension?: string;
+  detailsFile: DetailsFileResponse; 
+  behaviours: {
+    data: BehaviourDataItem[]; 
+  };
+}
+
+// Interface untuk data laporan yang akan dikirimkan ke Telegram
+interface TelegramMessageData {
+  fileName: string;
+  timestamp?: string;      
+  fileExtension?: string;  // Pastikan ini ada
+  type_tags?: string[];  
+  md5: string;
+  sha1: string;
+  sha256: string;
+  score?: number;       
+  threatLabel?: string;  
+  viewReportUrl?: string;
+  groupedMitre?: Record<string, { id: string; description: string }[]>;
+  groupedSigma?: Record<string, { title: string }[]>; // Menambahkan ini
+  yaraRulesetNames?: string[];  
+}
+
+interface MitreTechnique {
+  id?: string[] | string;
+  severity?: string;
+  signature_description?: string;
+}
+interface SigmaAnalysisResult {
+  rule_level?: string;
+  rule_title?: string;
+}
 
 export function ScanSection() {
   const router = useRouter(); // Inisialisasi router
@@ -48,8 +131,29 @@ export function ScanSection() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ data, filename: fullFileName })
     })
-  }
+  };
 
+  const sendReportToTelegramAPI = async (reportData: TelegramMessageData) => {
+    try {
+      const response = await fetch('/api/send-report', { 
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(reportData),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        console.log("Laporan Telegram berhasil dikirim:", data.message);
+      } else {
+        console.error("Gagal mengirim laporan Telegram:", data.message);
+      }
+    } catch (error) {
+      console.error("Terjadi kesalahan saat memanggil API Telegram:", error);
+    }
+  };
 
   const handleFileUpload = async () => {
     if (!file || isFileTooLarge) return
@@ -65,20 +169,69 @@ export function ScanSection() {
         const meta = analysis?.meta?.file_info
         if (meta) {
           // Step 4: Get behaviours using available hash
-        const detailsFile = await vtScan.getDetails(meta)
-        const behaviours = await vtScan.getBehaviours(meta)
-        // Step 5: Combine analysis + behaviours into single object
-        const combinedResult = {
-          type: 'file-scan',
-          filename: file.name,
-          timestamp: new Date().toISOString(),
-          detailsFile,
-          behaviours,
-        }
+          const detailsFile = await vtScan.getDetails(meta)
+          const behaviours = await vtScan.getBehaviours(meta)
+
+          const combinedResult: CombinedScanResult = {
+            type: 'file-scan',
+            filename: file.name,
+            timestamp: new Date().toISOString(),
+            detailsFile,
+            behaviours,
+          };
+          // --- LOGIKA PEMROSESAN MITRE ---
+          const mitres = combinedResult.behaviours?.data?.flatMap((item: BehaviourDataItem) => item.attributes?.mitre_attack_techniques ?? []) ?? [];
+          const groupedMitre = mitres.reduce((acc: Record<string, { id: string; description: string }[]>, technique: MitreTechnique) => {
+          const severity = technique.severity ?? "UNKNOWN";
+          const ids = Array.isArray(technique.id) ? technique.id : (technique.id ? [technique.id] : []);
+            if (!acc[severity]) acc[severity] = [];
+            ids.forEach((id: string) => {
+              acc[severity].push({
+                  id,
+                  description: technique.signature_description ?? "No description"
+              });
+            });
+            return acc;
+          }, {} as Record<string, { id: string; description: string }[]>);
+
+          const sigmas = combinedResult.behaviours?.data?.flatMap((item: BehaviourDataItem) => item.attributes?.sigma_analysis_results ?? []) ?? [];
+          const groupedSigma = sigmas.reduce((acc: Record<string, { title: string }[]>, rule: SigmaAnalysisResult) => {
+            const level = rule.rule_level?.toLowerCase() ?? "unknown";
+            const title = rule.rule_title?.trim();
+            if (!title) return acc;
+            if (!acc[level]) acc[level] = [];
+            if (!acc[level].some(t => t.title.toLowerCase() === title.toLowerCase()))
+              acc[level].push({ title });
+            return acc;
+          }, {} as Record<string, { title: string }[]>);
+
+          const yaraResults = combinedResult.detailsFile.data?.attributes?.crowdsourced_yara_results ?? [];
+          const yaraRulesetNames = Array.from(new Set(
+            yaraResults
+              .map(rule => rule.ruleset_name?.trim())
+              .filter((name): name is string => typeof name === 'string' && name.length > 0)
+          ));
+
+          const telegramData: TelegramMessageData = {
+              fileName: combinedResult.filename,
+              md5: combinedResult.detailsFile?.data?.attributes?.md5 || 'N/A',
+              sha1: combinedResult.detailsFile?.data?.attributes?.sha1 || 'N/A',
+              sha256: combinedResult.detailsFile?.data?.attributes?.sha256 || 'N/A',
+              threatLabel: combinedResult.detailsFile?.data?.attributes?.popular_threat_classification?.suggested_threat_label,
+              score: combinedResult.detailsFile?.data?.attributes?.reputation,
+              viewReportUrl: `https://www.virustotal.com/gui/file/${combinedResult.detailsFile?.data?.attributes?.md5}`, // Contoh URL ke halaman detail laporan Anda
+              timestamp: combinedResult.timestamp,
+              fileExtension: combinedResult.fileExtension, 
+              type_tags: combinedResult.detailsFile?.data?.attributes?.type_tags,
+              groupedMitre: groupedMitre,
+              groupedSigma: groupedSigma, 
+              yaraRulesetNames: yaraRulesetNames, 
+          };
           // Step 6: Save to local download and to /logs folder via API
           console.log("[Malwatcher][Analysis + Behav]", combinedResult)
-          // saveJsonFile(combinedResult, file.name)
+          // saveJsonFile(combinedResult, file.name) //download file hasil scan
           await saveLogToServer(combinedResult, file.name)
+          await sendReportToTelegramAPI(telegramData);
           router.push('/scan-result');
         }  
       }
@@ -88,24 +241,23 @@ export function ScanSection() {
       setLoading(false)
     }
   }
-
   const handleUrlScan = async () => {
-  if (!url) return
-  try {
-    setLoading(true)
-    // Step 1: Submit URL ke VirusTotal
-    const res = await vtScan.scanUrl({ url })
-    const analysisId = res?.data?.id
-    // Step 2: Jika ada ID, ambil hasil analisisnya
-    if (analysisId) {
-      const analysis = await vtScan.pollAnalysis(analysisId)
+    if (!url) return
+    try {
+      setLoading(true)
+      // Step 1: Submit URL ke VirusTotal
+      const res = await vtScan.scanUrl({ url })
+      const analysisId = res?.data?.id
+      // Step 2: Jika ada ID, ambil hasil analisisnya
+      if (analysisId) {
+        const analysis = await vtScan.pollAnalysis(analysisId)
+      }
+    } catch (error) {
+      console.error("[Malwatcher]", error); 
+    } finally {
+      setLoading(false)
     }
-  } catch (error) {
-    console.error("[Malwatcher][URL Error]", error)
-  } finally {
-    setLoading(false)
   }
-}
 
   return (
     <div className="container px-4 py-16 mb-20 mx-auto max-w-7xl" id="scan">
@@ -173,7 +325,7 @@ export function ScanSection() {
           <div className="flex justify-center">
             <svg xmlns="http://www.w3.org/2000/svg" height="84" viewBox="0 0 746 525"> 
             <path style={{ fill: "var(--bs-tertiary-color)" }} d="M596.5 241h-90.2c-.3-11.5-1.1-22.8-2.2-34h-30.2c1.2 11.1 2 22.5 2.3 34H386v-34h-30v34h-90.2c.4-11.5 1.1-22.9 2.3-34h-30.2c-1.1 11.1-1.8 22.5-2.2 34h-90.2c.8-11.5 2.4-22.9 4.8-34h-30.7c-3.1 16-4.7 32.4-4.7 49 0 68.4 26.6 132.7 75 181 48.4 48.4 112.6 75 181 75s132.7-26.6 181-75c48.4-48.4 75-112.6 75-181 0-16.6-1.6-33-4.7-49h-30.7c2.6 11.1 4.2 22.5 5 34zM171.1 361.5c-14.7-27.8-23.4-58.5-25.5-90.4h90.2c.9 31.6 4.8 62.2 11.5 90.4h-76.2zm40.1 54.3c-7.6-7.6-14.6-15.7-21.1-24.3h65.4c4.8 14.8 10.4 28.8 16.9 41.6 6.8 13.5 14.2 25.5 22.2 35.7-31-11.1-59.4-29-83.4-53zm88 3.9c-4.4-8.8-8.4-18.2-12-28.2H356v87.9c-20.7-6.9-40.8-27.8-56.8-59.7zm56.8-58.2h-77.9c-7.1-27.8-11.3-58.5-12.3-90.4H356v90.4zm30-90.5h90.2c-1 32-5.2 62.6-12.3 90.4H386V271zm0 208.4v-87.9h68.7c-3.6 9.9-7.6 19.4-12 28.2-15.9 31.9-36 52.8-56.7 59.7zm144.8-63.6c-24 24-52.4 41.9-83.4 53 8-10.2 15.5-22.1 22.2-35.7 6.4-12.8 12-26.8 16.9-41.6h65.4c-6.5 8.6-13.5 16.7-21.1 24.3zm40.1-54.3h-76.1c6.6-28.2 10.5-58.8 11.5-90.4h90.2c-2.1 31.9-10.8 62.6-25.6 90.4z"></path> 
-            <path style={{ fill: "var(--bs-body-color)" }} d="M150.4 207c4.3-19.7 11.3-38.7 20.7-56.5h76.1c-4.2 18-7.3 36.9-9.3 56.5h30.2c2.1-19.7 5.4-38.7 10-56.5H356V207h30v-56.5h77.9c4.5 17.8 7.9 36.8 10 56.5h30.2c-1.9-19.6-5.1-38.5-9.3-56.5h76.1c9.4 17.8 16.3 36.7 20.7 56.5h30.7c-9.6-49.7-33.7-95.4-70.3-132C503.7 26.6 439.4 0 371 0S238.3 26.6 190 75c-36.6 36.6-60.7 82.3-70.3 132h30.7zM530.8 96.2c7.6 7.6 14.6 15.7 21.1 24.3h-65.4c-4.8-14.8-10.4-28.8-16.9-41.6-6.8-13.5-14.2-25.5-22.2-35.7 31 11.1 59.4 29 83.4 53zM386 32.6c20.7 6.9 40.8 27.8 56.7 59.7 4.4 8.8 8.4 18.2 12 28.2H386V32.6zm-30 0v87.9h-68.7c3.6-9.9 7.6-19.4 12-28.2 15.9-31.9 36-52.8 56.7-59.7zM211.2 96.2c24-24 52.4-41.9 83.4-53-8 10.2-15.5 22.1-22.2 35.7-6.4 12.8-12 26.8-16.9 41.6h-65.4c6.5-8.6 13.5-16.7 21.1-24.3z"></path>
+            <path style={{ fill: "var(--bs-body-color)" }} d="M150.4 207c4.3-19.7 11.3-38.7 20.7-56.5h76.1c-4.2 18-7.3 36.9-9.3 56.5h30.2c2.1-19.7 5.4-38.7 10-56.5H356V207h30v-56.5h77.9c4.5 17.8 7.9 36.8 10 56.5h30.2c-1.9-19.6-5.1-38.5-9.3-56.5h76.1c9.4 17.8 16.3 36.7 20.7 56.5h30.7c-9.6-49.7-33.7-95.4-70.3-132C503.7 26.6 439.4 0 371 0S238.3 26.6 190 75c-36.6 36.6-60.7 82.3-70.3 132h30.7zM530.8 96.2c7.6 7.6 14.6 15.7 21.1 24.3h-65.4c-4.8-14.8-10.4-28.8-16.9-41.6-6.8-13.5-14.2-25.5-22.2-35.7 31 11.1 59.4 29 83.4 53zM386 32.6c20.7 6.9 40.8 27.8 56.7 59.7 4.4 8.8 8.4 18.2 12 28.2H386V32.6zm-30 0v87.9h-68.7c3.6-9.9 7.6-19.4 12-28.2 15.9-31.9 36-52.8-56.7-59.7zM211.2 96.2c24-24 52.4-41.9 83.4-53-8 10.2-15.5 22.1-22.2 35.7-6.4 12.8-12 26.8-16.9-41.6h-65.4c6.5-8.6 13.5-16.7 21.1-24.3z"></path>
             <path style={{ fill: "var(--bs-primary)" }} d="M.5 177h745v30H.5z"></path> </svg>
           </div>
           

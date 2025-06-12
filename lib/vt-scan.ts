@@ -77,7 +77,7 @@ const vtScan = {
       console.log(`[VT Scan][Polling] Try ${i + 1}: Status = ${status}`)
       await new Promise(resolve => setTimeout(resolve, delay))
     }
-    throw new Error('Analysis did not complete in time.')
+    throw new Error('Analysis did not complete in time. Please check your network and refresh this page!')
   },  
 getDetails: async (meta: { sha256?: string; sha1?: string; md5?: string }, limit: number = 10, retries = 10, delay = 3000) => {
     const hashes = [meta.sha256, meta.sha1, meta.md5].filter(Boolean)

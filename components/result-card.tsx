@@ -100,7 +100,7 @@ export function ResultCard({ filename, data, children, className, onClick, // De
   // Kelompokkan MITRE berdasarkan severity
   const mitres = data?.behaviours?.data?.flatMap(item => item.attributes?.mitre_attack_techniques ?? []) ?? []
   const groupedMitre = mitres.reduce((acc, technique) => {
-    const severity = technique.severity ?? "IMPACT_SEVERITY_"
+    const severity = technique.severity ?? "UNKNOWN"
     const ids = Array.isArray(technique.id) ? technique.id : technique.id ? [technique.id] : []
 
     if (!acc[severity]) acc[severity] = []
@@ -136,7 +136,6 @@ const rulesetName = rule.ruleset_name?.trim() || "unknown_ruleset";
   if (!acc[rulesetName]) {
     acc[rulesetName] = [];
   }
-
   // Tambahkan rule ke array rulesetName tersebut
   // Hanya ambil properti rule_name dan description yang relevan untuk tooltip
   if (rule.rule_name && !acc[rulesetName].some(r => r.rule_name === rule.rule_name)) {
@@ -166,7 +165,7 @@ const yaraRulesetOrder = Object.keys(groupedYara).sort(); // Mengurutkan secara 
                     </div>
                     <div className="flex items-center gap-1 mx-1">
                       <ShieldAlert className="w-4 h-4" />
-                      <span>Threat Labeled: {data.detailsFile.data?.attributes?.popular_threat_classification?.suggested_threat_label}</span>
+                      <span>Threat Label: {data.detailsFile.data?.attributes?.popular_threat_classification?.suggested_threat_label}</span>
                     </div>
                     <div className="flex items-center gap-1 mx-1">
                       <Gauge className="w-4 h-4" />
