@@ -282,13 +282,13 @@ export function HeroSection() {
                   <ArrowRight className="w-4 h-4" />
                 </Button>
               </Link>
-              <Link href="#dashboard" className="w-full sm:w-auto">
+              <Link href="/scan-result" className="w-full sm:w-auto">
                 <Button
                   size="lg"
                   variant="outline"
                   className="w-full border-2 border-primary/50 hover:border-primary hover:bg-primary/10"
                 >
-                  View Dashboard
+                  View Logs
                 </Button>
               </Link>
             </div>
