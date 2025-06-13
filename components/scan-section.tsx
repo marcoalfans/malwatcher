@@ -5,7 +5,7 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Loader2 } from "lucide-react"
+import { Loader2, Sparkles } from "lucide-react"
 import vtScan from "@/lib/vt-scan"
 import { useRouter } from 'next/navigation';
 
@@ -341,6 +341,8 @@ export function ScanSection() {
         </TabsContent>
       </Tabs>
       </motion.div>
+      <div className="mb-16"></div>
     </div>
+    
   )
 }

@@ -3,10 +3,11 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import { Calendar, File, Gauge, ShieldAlert, ShieldQuestion, Sparkles } from "lucide-react"
+import { Calendar, File, Flame, Gauge, ShieldAlert, ShieldQuestion, Sparkles, SquareTerminal } from "lucide-react"
 import { format } from "date-fns"
 import { enUS } from "date-fns/locale"
-import { motion, MotionProps, number } from "framer-motion";
+import { motion, MotionProps, AnimatePresence } from "framer-motion";
+import { useState } from "react"; 
 
 interface VTAnalBehavData {
   filename: string
@@ -63,6 +64,8 @@ const MotionCard = motion(Card);
 export function ResultCard({ filename, data, children, className, onClick, // Destructure semua props, termasuk yang dari MotionProps
   ...motionAndOtherProps}: ResultCardProps) {
 
+  const [isHovered, setIsHovered] = useState(false);
+  
   const formattedTimestamp = data.timestamp
     ? format(new Date(data.timestamp), 'dd MMMM yyyy HH:mm', { locale: enUS }) // Contoh format dengan lokal Indonesia
     : "unknown";
@@ -81,12 +84,12 @@ export function ResultCard({ filename, data, children, className, onClick, // De
   const sigmaOrder = ["critical", "high", "medium", "low", "info","unknown"]
 
   const severityColorMap: Record<string, string> = {
-    IMPACT_SEVERITY_CRITICAL: "bg-red-600/40 text-white hover:bg-red-700/90",
-    IMPACT_SEVERITY_HIGH: "bg-orange-500/40 text-white hover:bg-orange-600/90",
-    IMPACT_SEVERITY_MEDIUM: "bg-yellow-400/40 text-white hover:bg-yellow-500/90",
-    IMPACT_SEVERITY_LOW: "bg-blue-500/40 text-white hover:bg-blue-600/90",
-    IMPACT_SEVERITY_INFO: "bg-gray-500/40 text-white hover:bg-gray-600/90",
-    UNKNOWN: "bg-muted"
+    IMPACT_SEVERITY_CRITICAL: "bg-purple-500/20 text-purple-300 hover:bg-purple-700/40 hover:text-white",
+    IMPACT_SEVERITY_HIGH: "bg-red-600/20 text-red-400 hover:bg-red-700/40 hover:text-white",
+    IMPACT_SEVERITY_MEDIUM: "bg-orange-500/20 text-orange-300 hover:bg-orange-600/40 hover:text-white",
+    IMPACT_SEVERITY_LOW: "bg-yellow-400/20 text-yellow-300 hover:bg-yellow-500/40 hover:text-white",
+    IMPACT_SEVERITY_INFO: "bg-blue-500/20 text-blue-300 hover:bg-blue-600/40 hover:text-white",
+    UNKNOWN: "bg-gray-500/20 text-gray-300 hover:bg-gray-600/40 hover:text-white"
   }
 
   const sigmaLevelColorMap: Record<string, string> = {
@@ -152,12 +155,15 @@ const yaraRulesetOrder = Object.keys(groupedYara).sort(); // Mengurutkan secara 
 
   return (
     <MotionCard
-      className={className} 
-      onClick={onClick}    
+      className={className}
+      onClick={onClick}
+      onHoverStart={() => setIsHovered(true)}
+      onHoverEnd={() => setIsHovered(false)}     
       {...motionAndOtherProps}
     >
       <CardHeader className=" p-3 sm:p-3">
-        <CardTitle className="text-base !text-base">📃{filename}</CardTitle>
+        <CardTitle className="text-base !text-base">📃{filename}
+        </CardTitle>
         <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
                     <div className="flex items-center gap-1 mx-1">
                       <Calendar className="w-4 h-4" />
@@ -182,7 +188,7 @@ const yaraRulesetOrder = Object.keys(groupedYara).sort(); // Mengurutkan secara 
                       <div className="flex items-center gap-1 mx-1">
                         {/* Melakukan map (iterasi) pada array type_tags */}
                         {data.detailsFile.data.attributes.type_tags.map((tag, index) => (
-                          <Badge key={index} className="text-xs mx-0 cursor-pointer" style={{ backgroundColor: 'rgba(0, 123, 255, 0.5)'}}>
+                          <Badge key={index} className="text-xs mx-0 cursor-pointer bg-blue-700/20 text-white">
                             {tag}
                           </Badge>
                         ))}
@@ -195,6 +201,37 @@ const yaraRulesetOrder = Object.keys(groupedYara).sort(); // Mengurutkan secara 
           <Badge variant="outline">SHA256: <span className="mx-1 text-muted-foreground">{sha256 || "-"}</span></Badge>
         </div>
       </CardHeader>
+      <AnimatePresence>
+        {isHovered && ( // Render Sparkles hanya jika isHovered true
+            <motion.div
+              initial={{ opacity: 0 }} // Sparkles awalnya tidak terlihat
+              animate={{
+                opacity: 1, // Muncul saat di-hover
+                rotate: [0, 10, -10, 0],
+                scale: [1, 1.2, 1],
+              }}
+              exit={{ opacity: 0 }} // Menghilang saat tidak di-hover
+              transition={{
+                opacity: { duration: 0.2 }, // Transisi opacity saat masuk/keluar
+                rotate: {
+                  duration: 1.5,
+                  repeat: Infinity,
+                  repeatType: "loop",
+                  delay: 0.2
+                },
+                scale: {
+                  duration: 1.5,
+                  repeat: Infinity,
+                  repeatType: "loop",
+                  delay: 0.2
+                }
+              }}
+              className="absolute top-2 right-2" // Sesuaikan posisi Sparkles
+            >
+              <SquareTerminal className="w-6 h-6 text-green-400" />
+            </motion.div>
+        )}
+      </AnimatePresence>
       <CardContent className="p-3 sm:p-2 mx-3 text-sm text-muted-foreground space-y-2">
         <div><strong>Detections:</strong> {verdictText}</div>
         {/* MITRE Techniques */}
@@ -253,7 +290,7 @@ const yaraRulesetOrder = Object.keys(groupedYara).sort(); // Mengurutkan secara 
               <TooltipProvider key={rulesetName}>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Badge className="text-xs mx-1 cursor-pointer bg-red-500 text-white bg-opacity-50" >
+                    <Badge className="text-xs mx-1 cursor-pointer bg-red-500 text-white bg-opacity-50 hover:bg-blue-900/30 hover:text-blue-500" >
                       {rulesetName}
                     </Badge>
                   </TooltipTrigger>

@@ -8,10 +8,8 @@ import { FallbackImage } from "@/components/fallback-image"
 
 // Lazy load heavy sections for better initial page load
 const HeroSection = lazy(() => import("@/components/hero-section").then(m => ({ default: m.HeroSection })))
-const ProjectsSection = lazy(() => import("@/components/projects-section").then(m => ({ default: m.ProjectsSection })))
 const ScanSection = lazy(() => import("@/components/scan-section").then(m => ({ default: m.ScanSection })))
-const CTFSection = lazy(() => import("@/components/ctf-section").then(m => ({ default: m.CTFSection })))
-const ExperienceSection = lazy(() => import("@/components/experience-section").then(m => ({ default: m.ExperienceSection })))
+const DashboardSection = lazy(() => import("@/components/dashboard-section").then(m => ({ default: m.DashboardSection })))
 
 // Memoized About section component
 const AboutSection = memo(() => (
@@ -150,16 +148,9 @@ function HomePageClient() {
       </Suspense>
 
       <Suspense fallback={<SectionFallback />}>
-        <ExperienceSection />
+        <DashboardSection />
       </Suspense>
 
-      <Suspense fallback={<SectionFallback />}>
-        <ProjectsSection />
-      </Suspense>
-
-      <Suspense fallback={<SectionFallback />}>
-        <CTFSection />
-      </Suspense>
     </div>
   )
 }

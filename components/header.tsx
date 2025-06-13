@@ -18,9 +18,8 @@ const navItems = [
   { name: "Home", path: "/", icon: <Shield className="w-4 h-4" /> },
   { name: "About", path: "/#about", icon: <BookOpen className="w-4 h-4" /> },
   { name: "Scan", path: "/#scan", icon: <ScanText className="w-4 h-4" /> },
-  { name: "Experience", path: "/#experience", icon: <ChartNoAxesCombined className="w-4 h-4" /> },
+  { name: "Dashboard", path: "/#dashboard", icon: <ChartNoAxesCombined className="w-4 h-4" /> },
   { name: "Logs", path: "/scan-result", icon: <Logs className="w-4 h-4" /> },
-  { name: "CTF", path: "/#ctf", icon: <Shield className="w-4 h-4" /> },
   { name: "Search", path: "/search", icon: <Search className="w-4 h-4" /> },
 ]
 
@@ -52,7 +51,7 @@ export function Header() {
 
     // Fallback scroll handler for manual section detection
     const handleScroll = () => {
-      const sections = ["about", "scan", "experience", "projects", "ctf"]
+      const sections = ["about", "scan", "connect", "dashboard"]
       const scrollY = window.scrollY + 100 // Account for header height
 
       // If at the very top, no section is active
@@ -81,7 +80,7 @@ export function Header() {
     // Wait for components to be fully loaded (especially lazy-loaded ones)
     const setupObserver = () => {
       // Get all sections that correspond to navigation items
-      const sections = ["about", "scan", "experience", "projects", "ctf"]
+      const sections = ["about", "scan", "connect", "dashboard"]
       const sectionElements: HTMLElement[] = []
 
       sections.forEach((sectionId) => {

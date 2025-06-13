@@ -118,8 +118,8 @@ export default function SearchPage() {
     <div className="container px-4 py-12 mx-auto max-w-7xl">
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight mb-2">Search Posts</h1>
-          <p className="text-muted-foreground">Find articles by title, content, or category</p>
+          <h1 className="text-3xl font-bold tracking-tight mb-2">Browse Scan Results</h1>
+          <p className="text-muted-foreground">Explore and review detailed reports of all scanned files. This section provides an organized view of your security scan history, allowing you to quickly navigate through individual scan results to identify and understand potential threats detected by Malwatcher.</p>
         </div>
         <Link href={"/"}>
           <Button variant="outline">
@@ -135,11 +135,12 @@ export default function SearchPage() {
             <SearchBar 
               value={searchQuery}
               onChange={handleSearch}
-              placeholder="Search posts, categories, content..."
+              placeholder="Search filename, threat label, MITRE, SIGMA, YARA rules.."
               className="w-full max-w-none"
             />
           </Suspense>
         </div>
+        <p className="text-muted-foreground"><br></br> // this page is under construction 🚧</p>
       </div>
 
       {/* {searchQuery && (

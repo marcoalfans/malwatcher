@@ -5,6 +5,7 @@ import { useEffect, useState, useRef } from "react"
 import { ResultNavigation } from "@/components/result-navigation"
 import { ResultCard} from "@/components/result-card"
 import { motion, AnimatePresence } from "framer-motion" 
+import { Sparkles } from "lucide-react"
 
 interface VTAnalBehavData {
   filename: string
@@ -148,7 +149,7 @@ export function ResultPageClient({ results }: Props) {
                 whileInView={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.4, delay: index * 0.05 }}
                 viewport={{ once: true }}
-                whileHover={{ scale: 1.02 }}
+                whileHover={{ scale: 1.02}}
                 className="cursor-pointer w-full"
                 onClick={() => handleResultCardClick(index)} // Tetap panggil ini untuk ekspansi
               >
