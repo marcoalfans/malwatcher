@@ -124,7 +124,7 @@ export function ScanSection() {
     const date = new Date()
     const timestamp = `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}_${pad(date.getHours())}${pad(date.getMinutes())}`
     const fullFileName = `${timestamp}_file_${fileName}.json`
-    const urlsave = '/api/save-log'.replace(/\/+$/, '') // safe URL tanpa trailing slash
+    const urlsave = '/api/save-log'.replace(/\/+\$/, '') // safe URL tanpa trailing slash
 
     await fetch(urlsave, {
       method: 'POST',
@@ -179,20 +179,21 @@ export function ScanSection() {
             detailsFile,
             behaviours,
           };
+
           // --- LOGIKA PEMROSESAN MITRE ---
           const mitres = combinedResult.behaviours?.data?.flatMap((item: BehaviourDataItem) => item.attributes?.mitre_attack_techniques ?? []) ?? [];
           const groupedMitre = mitres.reduce((acc: Record<string, { id: string; description: string }[]>, technique: MitreTechnique) => {
-          const severity = technique.severity ?? "UNKNOWN";
-          const ids = Array.isArray(technique.id) ? technique.id : (technique.id ? [technique.id] : []);
+            const severity = technique.severity ?? "UNKNOWN";
+            const ids = Array.isArray(technique.id) ? technique.id : (technique.id ? [technique.id] : []);
             if (!acc[severity]) acc[severity] = [];
             ids.forEach((id: string) => {
               acc[severity].push({
-                  id,
-                  description: technique.signature_description ?? "No description"
+                id,
+                description: technique.signature_description ?? "No description"
               });
             });
             return acc;
-          }, {} as Record<string, { id: string; description: string }[]>);
+          }, {});
 
           const sigmas = combinedResult.behaviours?.data?.flatMap((item: BehaviourDataItem) => item.attributes?.sigma_analysis_results ?? []) ?? [];
           const groupedSigma = sigmas.reduce((acc: Record<string, { title: string }[]>, rule: SigmaAnalysisResult) => {
@@ -203,7 +204,7 @@ export function ScanSection() {
             if (!acc[level].some(t => t.title.toLowerCase() === title.toLowerCase()))
               acc[level].push({ title });
             return acc;
-          }, {} as Record<string, { title: string }[]>);
+          }, {});
 
           const yaraResults = combinedResult.detailsFile.data?.attributes?.crowdsourced_yara_results ?? [];
           const yaraRulesetNames = Array.from(new Set(
@@ -213,23 +214,22 @@ export function ScanSection() {
           ));
 
           const telegramData: TelegramMessageData = {
-              fileName: combinedResult.filename,
-              md5: combinedResult.detailsFile?.data?.attributes?.md5 || 'N/A',
-              sha1: combinedResult.detailsFile?.data?.attributes?.sha1 || 'N/A',
-              sha256: combinedResult.detailsFile?.data?.attributes?.sha256 || 'N/A',
-              threatLabel: combinedResult.detailsFile?.data?.attributes?.popular_threat_classification?.suggested_threat_label,
-              score: combinedResult.detailsFile?.data?.attributes?.reputation,
-              viewReportUrl: `https://www.virustotal.com/gui/file/${combinedResult.detailsFile?.data?.attributes?.md5}`, // Contoh URL ke halaman detail laporan Anda
-              timestamp: combinedResult.timestamp,
-              fileExtension: combinedResult.fileExtension, 
-              type_tags: combinedResult.detailsFile?.data?.attributes?.type_tags,
-              groupedMitre: groupedMitre,
-              groupedSigma: groupedSigma, 
-              yaraRulesetNames: yaraRulesetNames, 
+            fileName: combinedResult.filename,
+            md5: combinedResult.detailsFile?.data?.attributes?.md5 || 'N/A',
+            sha1: combinedResult.detailsFile?.data?.attributes?.sha1 || 'N/A',
+            sha256: combinedResult.detailsFile?.data?.attributes?.sha256 || 'N/A',
+            threatLabel: combinedResult.detailsFile?.data?.attributes?.popular_threat_classification?.suggested_threat_label,
+            score: combinedResult.detailsFile?.data?.attributes?.reputation,
+            viewReportUrl: `https://www.virustotal.com/gui/file/${combinedResult.detailsFile?.data?.attributes?.sha256}`,
+            timestamp: combinedResult.timestamp,
+            fileExtension: combinedResult.fileExtension, 
+            type_tags: combinedResult.detailsFile?.data?.attributes?.type_tags,
+            groupedMitre: groupedMitre,
+            groupedSigma: groupedSigma, 
+            yaraRulesetNames: yaraRulesetNames, 
           };
-          // Step 6: Save to local download and to /logs folder via API
+
           console.log("[Malwatcher][Analysis + Behav]", combinedResult)
-          // saveJsonFile(combinedResult, file.name) //download file hasil scan
           await saveLogToServer(combinedResult, file.name)
           await sendReportToTelegramAPI(telegramData);
           router.push('/scan-result');
@@ -241,6 +241,7 @@ export function ScanSection() {
       setLoading(false)
     }
   }
+
   const handleUrlScan = async () => {
     if (!url) return
     try {
@@ -251,6 +252,7 @@ export function ScanSection() {
       // Step 2: Jika ada ID, ambil hasil analisisnya
       if (analysisId) {
         const analysis = await vtScan.pollAnalysis(analysisId)
+        console.log("[Malwatcher][URL Analysis]", analysis)
       }
     } catch (error) {
       console.error("[Malwatcher]", error); 

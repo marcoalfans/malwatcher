@@ -127,7 +127,7 @@ export function ResultPageClient({ results }: Props) {
 
       <div className="relative border-l-2 border-muted pl-8 ml-4">
         {sortedResults.map((r, index) => {
-          const metadata = r.data?.detailsFile.data?.attributes?.md5 || r.data?.detailsFile.data?.attributes?.sha256 || "-";
+          const metadata = r.data?.detailsFile.data?.attributes?.sha256 || r.data?.detailsFile.data?.attributes?.md5 || "-";
           return (
             <div
               key={r.filename}
